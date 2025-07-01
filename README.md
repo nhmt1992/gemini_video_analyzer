@@ -1,6 +1,3 @@
-# KRONOS 動画分析アプリ - 取扱説明書
-# KRONOS Video Analysis App - User Manual
-
 # KRONOS Video Analyzer
 
 ショート動画（TikTok、YouTube Shorts等）の分析と改善を支援するAIツール
