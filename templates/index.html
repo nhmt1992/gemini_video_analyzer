@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Video Analyzer</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f6f8fa;
+            color: #24292e;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 20px 40px;
+        }
+        h1 {
+            border-bottom: 1px solid #eaecef;
+            padding-bottom: 0.3em;
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #d1d5da;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .info-message {
+            background-color: #e6ffed;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .progress-status {
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #0366d6;
+        }
+
+        .progress-message {
+            margin-bottom: 15px;
+            color: #586069;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress {
+            width: 0%;
+            height: 100%;
+            background-color: #2ea44f;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 5px;
+            font-weight: bold;
+            color: #24292e;
+        }
+
+        .notification {
+            display: none;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            text-align: center;
+            animation: fadeIn 0.5s;
+        }
+
+        .notification.success {
+            background-color: #2ea44f;
+            color: white;
+        }
+
+        .notification.error {
+            background-color: #d73a49;
+            color: white;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .steps-container {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 4px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 4px;
+            background-color: #f6f8fa;
+        }
+
+        .step.active {
+            background-color: #e6ffed;
+            border-left: 4px solid #2ea44f;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 12px;
+            background-color: #d1d5da;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 12px;
+        }
+
+        .step.active .step-number {
+            background-color: #2ea44f;
+        }
+
+        .step-text {
+            flex-grow: 1;
+        }
+
+        .file-drop-area {
+            position: relative;
+            border: 2px dashed #d1d5da;
+            border-radius: 6px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .file-drop-area.drag-over {
+            background-color: #e6ffed;
+            border-color: #2ea44f;
+        }
+
+        .file-drop-area .icon {
+            font-size: 48px;
+            color: #586069;
+            margin-bottom: 10px;
+        }
+
+        .file-drop-area .text {
+            color: #586069;
+            margin: 5px 0;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            margin-top: 10px;
+        }
+
+        .file-input-button {
+            display: inline-block;
+            background-color: #0366d6;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .file-input-button:hover {
+            background-color: #0256b4;
+        }
+
+        .file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-info {
+            margin-top: 15px;
+            padding: 12px;
+            background-color: #e6ffed;
+            border: 1px solid #34d058;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .file-info.visible {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Gemini Video Analyzer</h1>
+        <form action="/analyze" method="post" id="analysisForm" enctype="multipart/form-data">
+            <div class="file-drop-area" id="dropArea">
+                <div class="icon">📁</div>
+                <p class="text">動画ファイルをここにドラッグ＆ドロップ</p>
+                <p class="text">または</p>
+                <div class="file-input-wrapper">
+                    <label class="file-input-button">
+                        ファイルを選択
+                        <input type="file" id="videoFile" name="video" 
+                               class="file-input"
+                               accept="video/mp4,video/quicktime,video/x-msvideo,.mp4,.mov,.avi">
+                    </label>
+                </div>
+            </div>
+            <div class="file-info" id="fileInfo"></div>
+
+            <label for="goal">動画のゴール:</label>
+            <input type="text" id="goal" name="goal" value="{{ goal }}" required>
+
+            <label for="target_audience">ターゲット視聴者像:</label>
+            <input type="text" id="target_audience" name="target_audience" value="{{ target_audience }}" required>
+
+            <label for="issue">現状の課題・悩み:</label>
+            <textarea id="issue" name="issue" required>{{ issue }}</textarea>
+
+            <button type="submit" id="submitBtn">分析プロセスを実行</button>
+        </form>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-status" id="progressStatus">処理を開始しています...</div>
+            <div class="progress-message" id="progressMessage"></div>
+            
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+            <div class="progress-text" id="progressText">0%</div>
+
+            <div class="steps-container" id="stepsContainer">
+                <div class="step" data-step="0">
+                    <div class="step-number">1</div>
+                    <div class="step-text">設定の読み込み</div>
+                </div>
+                <div class="step" data-step="1">
+                    <div class="step-number">2</div>
+                    <div class="step-text">動画ファイルの処理準備</div>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-number">3</div>
+                    <div class="step-text">ファイルのアップロード</div>
+                </div>
+                <div class="step" data-step="3">
+                    <div class="step-number">4</div>
+                    <div class="step-text">Geminiによる分析</div>
+                </div>
+                <div class="step" data-step="4">
+                    <div class="step-number">5</div>
+                    <div class="step-text">レポート生成</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="notification" id="notification"></div>
+
+        <div class="info-message">
+            <p>分析プロセスはバックグラウンドで実行されます。完了後、analysis_reportsフォルダにHTMLレポートが生成されます。</p>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const progressStatus = document.getElementById('progressStatus');
+        const progressMessage = document.getElementById('progressMessage');
+        const notification = document.getElementById('notification');
+        const form = document.getElementById('analysisForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const steps = document.querySelectorAll('.step');
+
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('videoFile');
+        const fileInfo = document.getElementById('fileInfo');
+        let selectedFile = null;
+
+        // ドラッグ&ドロップのイベントをキャンセル
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            document.body.addEventListener(eventName, preventDefaults);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // ドロップエリアのイベント
+        dropArea.addEventListener('dragenter', handleDragEnter);
+        dropArea.addEventListener('dragover', handleDragOver);
+        dropArea.addEventListener('dragleave', handleDragLeave);
+        dropArea.addEventListener('drop', handleDrop);
+
+        function handleDragEnter(e) {
+            preventDefaults(e);
+            dropArea.classList.add('drag-over');
+        }
+
+        function handleDragOver(e) {
+            preventDefaults(e);
+            e.dataTransfer.dropEffect = 'copy';
+        }
+
+        function handleDragLeave(e) {
+            preventDefaults(e);
+            if (!e.relatedTarget || !dropArea.contains(e.relatedTarget)) {
+                dropArea.classList.remove('drag-over');
+            }
+        }
+
+        function handleDrop(e) {
+            preventDefaults(e);
+            dropArea.classList.remove('drag-over');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFiles(files);
+            }
+        }
+
+        // ファイル選択のイベント
+        fileInput.addEventListener('change', (e) => {
+            const files = e.target.files;
+            if (files.length > 0) {
+                handleFiles(files);
+            }
+        });
+
+        function handleFiles(files) {
+            const file = files[0];
+            if (isValidVideoFile(file)) {
+                selectedFile = file;
+                updateFileInfo(file);
+            } else {
+                showError('MP4、MOV、またはAVIファイルを選択してください');
+                resetFileSelection();
+            }
+        }
+
+        function isValidVideoFile(file) {
+            const validTypes = ['video/mp4', 'video/quicktime', 'video/x-msvideo'];
+            const validExtensions = ['mp4', 'mov', 'avi'];
+            const fileExtension = file.name.toLowerCase().split('.').pop();
+            
+            return validTypes.includes(file.type) || validExtensions.includes(fileExtension);
+        }
+
+        function updateFileInfo(file) {
+            const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            fileInfo.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: space-between">
+                    <div>
+                        <strong>選択されたファイル:</strong><br>
+                        📹 ${file.name}<br>
+                        📊 ${sizeMB} MB
+                    </div>
+                </div>
+            `;
+            fileInfo.classList.add('visible');
+        }
+
+        function resetFileSelection() {
+            selectedFile = null;
+            fileInput.value = '';
+            fileInfo.classList.remove('visible');
+        }
+
+        function showError(message) {
+            alert(message);
+        }
+
+        // フォーム送信の処理
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!selectedFile) {
+                showError('動画ファイルを選択してください');
+                return;
+            }
+
+            progressContainer.style.display = 'block';
+            submitBtn.disabled = true;
+            notification.style.display = 'none';
+            
+            const formData = new FormData(this);
+            formData.append('video', selectedFile);
+
+            fetch('/analyze', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'error') {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                showError(error.message);
+                submitBtn.disabled = false;
+            });
+        });
+
+        // WebSocket接続の処理
+        socket.on('connect', () => {
+            console.log('WebSocket connected');
+        });
+
+        socket.on('disconnect', () => {
+            console.log('WebSocket disconnected');
+        });
+
+        socket.on('progress_update', function(data) {
+            console.log('Progress update received:', data);
+            progressContainer.style.display = 'block';
+            
+            const progress = data.progress;
+            progressBar.style.width = `${progress}%`;
+            progressText.textContent = `${progress}%`;
+            
+            if (data.step) {
+                progressStatus.textContent = data.step;
+                const stepIndex = ANALYSIS_STEPS.indexOf(data.step);
+                updateSteps(stepIndex);
+            }
+            
+            if (data.message) {
+                progressMessage.textContent = data.message;
+                progressMessage.style.display = 'block';
+            } else {
+                progressMessage.style.display = 'none';
+            }
+        });
+
+        socket.on('analysis_complete', function(data) {
+            progressContainer.style.display = 'block';
+            notification.textContent = data.message || '分析が完了しました！';
+            notification.className = 'notification success';
+            notification.style.display = 'block';
+            submitBtn.disabled = false;
+            progressBar.style.width = '100%';
+            progressText.textContent = '100%';
+        });
+
+        socket.on('analysis_error', function(data) {
+            progressContainer.style.display = 'block';
+            notification.textContent = data.message;
+            notification.className = 'notification error';
+            notification.style.display = 'block';
+            submitBtn.disabled = false;
+        });
+
+        function updateSteps(currentStep) {
+            steps.forEach((step, index) => {
+                if (index === currentStep) {
+                    step.classList.add('active');
+                } else {
+                    step.classList.remove('active');
+                }
+            });
+        }
+
+        const ANALYSIS_STEPS = [
+            '設定の読み込み',
+            '動画ファイルの処理準備',
+            'ファイルのアップロード',
+            'Geminiによる分析',
+            'レポート生成'
+        ];
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+# 以下の "YOUR_API_KEY" の部分を、ご自身のGoogle AI StudioのAPIキーに書き換えてください。
+GOOGLE_API_KEY="YOUR_API_KEY"
+
+# 分析したい動画が入っているフォルダのパスを指定します。
+# このままであれば、このフォルダ内にある "videos_to_analyze" フォルダを参照します。
+VIDEO_FOLDER_PATH="videos_to_analyze"
