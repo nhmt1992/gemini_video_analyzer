@@ -36,9 +36,10 @@ def setup_logging():
     )
     console_handler.setFormatter(console_formatter)
 
-    # ハンドラの追加
-    logger.addHandler(file_handler)
-    logger.addHandler(console_handler)
+    # ハンドラの追加（重複登録防止）
+    if not logger.handlers:
+        logger.addHandler(file_handler)
+        logger.addHandler(console_handler)
 
     # 起動メッセージ
     logging.info('=== KRONOS Video Analyzer ログシステム初期化完了 ===')

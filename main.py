@@ -15,7 +15,6 @@ import webbrowser
 load_dotenv()
 
 # --- ロギング設定 ---
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # --- 1. グローバル設定 ---
 try:
@@ -25,11 +24,7 @@ except KeyError:
     logging.error("エラー: .envファイルに 'GOOGLE_API_KEY' が設定されていません。")
     sys.exit(1)
 
-VIDEO_FOLDER_PATH = os.getenv("VIDEO_FOLDER_PATH")
-if not VIDEO_FOLDER_PATH:
-    logging.error("エラー: .envファイルに 'VIDEO_FOLDER_PATH' が設定されていません。")
-    sys.exit(1)
-
+VIDEO_FOLDER_PATH = config.get('VideoAnalysis', 'VIDEO_FOLDER_PATH', fallback='videos_to_analyze')
 OUTPUT_HTML_DIR = "analysis_reports"
 
 VIDEO_FILE_FORMATS = ('.mp4', '.mpeg', '.mov', '.avi', '.flv', '.mpg', '.webm', '.wmv', '.3gpp')

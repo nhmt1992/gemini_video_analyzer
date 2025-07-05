@@ -8,6 +8,7 @@ import logging
 import sys
 import shutil
 import webbrowser
+from datetime import datetime
 from logging_config import setup_logging
 
 # ロギングの初期化
